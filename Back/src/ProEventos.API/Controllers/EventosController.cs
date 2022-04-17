@@ -9,6 +9,7 @@ using ProEventos.Domain;
 using ProEventos.Persistence.Contextos;
 using ProEventos.Application.Contratos;
 using Microsoft.AspNetCore.Http;
+using ProEventos.Application.Dtos;
 
 namespace ProEventos.API.Controllers
 {
@@ -45,7 +46,7 @@ namespace ProEventos.API.Controllers
             try
             {
                 var evento = await _eventoService.GetEventoByIdAsync(id, true);
-                if (evento == null) return NotFound("Evento por Id encontrado");
+                if (evento == null) return NoContent();
 
                 return Ok(evento);
             }
@@ -62,7 +63,7 @@ namespace ProEventos.API.Controllers
             try
             {
                 var evento = await _eventoService.GetAllEventosByTemaAsync(tema, true);
-                if (evento == null) return NotFound("Eventos por tema não encontrados");
+                if (evento == null) return NoContent();
 
                 return Ok(evento);
             }
@@ -73,8 +74,8 @@ namespace ProEventos.API.Controllers
             }
         }
 
-        [HttpPost]  
-        public async Task<IActionResult> Post(Evento model)
+        [HttpPost]
+        public async Task<IActionResult> Post(EventoDto model)
         {
             try
             {
@@ -90,8 +91,8 @@ namespace ProEventos.API.Controllers
             }
         }
 
-        [HttpPut("{id}")]  
-        public async Task<IActionResult> Put(int id, Evento model)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, EventoDto model)
         {
             try
             {
@@ -107,7 +108,7 @@ namespace ProEventos.API.Controllers
             }
         }
 
-        [HttpDelete("{id}")]  
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
