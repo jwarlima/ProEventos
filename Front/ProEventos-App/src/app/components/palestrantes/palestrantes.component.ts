@@ -9,6 +9,7 @@ export class PalestrantesComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
+  ngOnInit(): void {
   }
+
 }
