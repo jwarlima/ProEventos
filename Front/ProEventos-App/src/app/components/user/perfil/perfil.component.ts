@@ -1,66 +1,54 @@
+import { ValidatorField } from './../../../helpers/ValidatorField';
 import { Component, OnInit } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { NgxSpinnerService } from 'ngx-spinner';
-import { UserUpdate } from '@app/models/identity/UserUpdate';
-import { AccountService } from '@app/services/account.service';
-import { environment } from '@environments/environment';
+import { AbstractControlOptions, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-perfil',
   templateUrl: './perfil.component.html',
-  styleUrls: ['./perfil.component.scss'],
+  styleUrls: ['./perfil.component.scss']
 })
 export class PerfilComponent implements OnInit {
-  public usuario = {} as UserUpdate;
-  public file: File;
-  public imagemURL = '';
 
-  public get ehPalestrante(): boolean {
-    return this.usuario.funcao === 'Palestrante';
-  }
+  form!: FormGroup;
 
-  constructor(
-    private spinner: NgxSpinnerService,
-    private toastr: ToastrService,
-    private accountService: AccountService
-  ) {}
+  constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
-
+    this.validation();
   }
 
-  public setFormValue(usuario: UserUpdate): void {
-    this.usuario = usuario;
-    if (this.usuario.imagemURL)
-      this.imagemURL = environment.apiURL + `resources/perfil/${this.usuario.imagemURL}`;
-    else
-      this.imagemURL = './assets/img/perfil.png';
+  private validation(): void {
+    const formOptions: AbstractControlOptions = {
+      validators: ValidatorField.MustMatch('senha', 'confirmeSenha')
+    };
 
+    this.form = this.fb.group({
+      titulo: ['', Validators.required],
+      primeiroNome: ['', Validators.required],
+      ultimoNome: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      telefone: ['', [Validators.required]],
+      descricao: ['', Validators.required],
+      funcao: ['', Validators.required],
+      senha: ['', [Validators.minLength(6), Validators.nullValidator]],
+      confirmeSenha: ['', Validators.nullValidator]
+    }, formOptions);
   }
 
-  onFileChange(ev: any): void {
-    const reader = new FileReader();
+  // Conveniente para pegar um FormField apenas com a letra F
+  get f(): any { return this.form.controls; }
 
-    reader.onload = (event: any) => this.imagemURL = event.target.result;
+  onSubmit(): void {
 
-    this.file = ev.target.files;
-    reader.readAsDataURL(this.file[0]);
-
-    this.uploadImagem();
+    // Vai parar aqui se o form estiver inválido
+    if (this.form.invalid) {
+      return;
+    }
   }
 
-  private uploadImagem(): void {
-    this.spinner.show();
-    this.accountService
-      .postUpload(this.file)
-      .subscribe(
-        () => this.toastr.success('Imagem atualizada com Sucesso', 'Sucesso!'),
-        (error: any) => {
-          this.toastr.error('Erro ao fazer upload de imagem','Erro!');
-          console.error(error);
-        }
-      ).add(() => this.spinner.hide());
+  public resetForm(event: any): void {
+    event.preventDefault();
+    this.form.reset();
   }
-
-
 }
